@@ -1,0 +1,49 @@
+---
+  - name: Install Nomad and consul
+    hosts: linux
+    vars:
+      greeting: Hello world!
+    tasks:
+      - name: ensure yum utils is there
+        yum:
+          name: yum-utils
+          state: latest
+
+      - name: Add repo for nomad
+        ansible.builtin.command: yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+
+      - name: ensure nomad is there
+        yum:
+          name: nomad
+          state: latest
+
+      - name: add repo for consul
+        ansible.builtin.command: yum-config-manager --add-repo https://rpm.releases.hashicorp.com/RHEL/hashicorp.repo
+
+      - name: ensure consul is there
+        yum:
+          name: consul
+          state: latest
+
+      - name: copying file with playbook
+        become: true 
+        copy:
+          src: /etc/ansible/roles/nomad/files/nomad.hcl
+          dest: /etc/nomad.d/
+          owner: nomad
+          group: nomad        
+          mode: 0644
+
+      - name: nomad service start
+        ansible.builtin.service:
+          name: nomad
+          state: started
+          enabled: true
+
+      - name: consul service start
+        ansible.builtin.service:
+          name: consul
+          state: started
+          enabled: true
+
+ 
